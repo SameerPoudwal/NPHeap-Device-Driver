@@ -58,12 +58,15 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_lock function.");
     struct mutex *obj_lock;
+    struct node *obj_node;
     //obj_lock = getMutex((__u64) user_cmd->offset); 
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
+        obj_node = getObject(copy.offset);
+        if(obj_node == NULL){
+            obj_node = createObject(copy.offset);
+        }
         obj_lock = getMutex(copy.offset);
-        if(obj_lock == NULL)
-            obj_lock = createObject(copy.offset);
     }
     else        
         return -EFAULT;
