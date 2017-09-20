@@ -56,7 +56,7 @@ struct node {
     void* k_virtual_addr;
     //pthread_mutex_t lock;
     p_lock *lock;
-    k_node *next = NULL;
+    k_node *next;
 }*k_head_list = NULL;
 
 
@@ -72,15 +72,16 @@ k_node createObject(__u64 offset)
     newNode->k_virtual_addr = NULL;
     if(k_head_list == NULL)
         {
-            head = newNode;
-            return head;
+            k_head_list = &newNode;
+            k_head_list->next = NULL;
+            return k_head_list;
         }
     else{
         struct node *temp = &k_head_list;
         while(temp->next!=NULL){
             temp = temp->next;
         }
-        temp->next = newNode;
+        temp->next = &newNode;
         newNode->next = NULL;
         return newNode;
     }
@@ -115,7 +116,7 @@ p_lock getMutex(__u64 inputOffset)
     return NULL;    
 }
 
-_u64 getSize(_u64 inputOffset)
+__u64 getSize(__u64 inputOffset)
 {
     printk("Starting getSize function.");
     struct node* temp = &k_head_list;
