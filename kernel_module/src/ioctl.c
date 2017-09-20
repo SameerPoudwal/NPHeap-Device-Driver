@@ -113,8 +113,8 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
     else        
         return -EFAULT;
 
-    object->size = 0;
-    object->k_virtual_addr = NULL;
+    //object->size = 0;
+    //object->k_virtual_addr = NULL;
     return 0;
 }
 
