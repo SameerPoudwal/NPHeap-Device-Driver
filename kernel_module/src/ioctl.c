@@ -42,12 +42,16 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 #include <linux/mutex.h>
-#include "core.c"
 
 // If exist, return the data.
 
 // mutex that will be shared among the threads
 // static DEFINE_MUTEX(k_mutex); 
+
+struct node* createObject(__u64 offset);
+struct node* getObject(__u64 inputOffset);
+struct mutex* getMutex(__u64 inputOffset);
+__u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
@@ -55,8 +59,11 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
     struct mutex *obj_lock;
     //obj_lock = getMutex((__u64) user_cmd->offset); 
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
         obj_lock = getMutex(copy.offset);
+        if(obj_lock == NULL)
+            obj_lock = createObject(copy.offset);
+    }
     else        
         return -EFAULT;
 
