@@ -42,6 +42,7 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 #include <linux/mutex.h>
+#include "core.c"
 
 // If exist, return the data.
 
