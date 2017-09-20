@@ -95,7 +95,7 @@ struct node* getObject(__u64 inputOffset)
     struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
-        if(temp->offset==inputOffset)
+        if(temp->objectId==inputOffset)
             return temp;
         temp = temp->next;     
     }
@@ -108,7 +108,7 @@ struct mutex* getMutex(__u64 inputOffset)
     struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
-        if(temp->offset==inputOffset)
+        if(temp->objectId==inputOffset)
             return temp->lock;    
         temp = temp->next;    
     }
@@ -122,7 +122,7 @@ __u64 getSize(__u64 inputOffset)
     struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
-        if(temp->offset==inputOffset)
+        if(temp->objectId==inputOffset)
             return temp->size;
         temp = temp->next;
     }
@@ -136,7 +136,7 @@ void resetAddress(__u64 inputOffset)
     struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
-        if(temp->offset==inputOffset)
+        if(temp->objectId==inputOffset)
             {
                 temp->k_virtual_addr=NULL;
                 temp->size=0;
