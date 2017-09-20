@@ -54,7 +54,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
     struct mutex *obj_lock;
     //obj_lock = getMutex((__u64) user_cmd->offset); 
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
         obj_lock = getMutex(copy.offset);
     else        
         return -EFAULT;
@@ -69,7 +69,7 @@ long npheap_unlock(struct npheap_cmd __user *user_cmd)
     struct mutex *obj_lock;
     //obj_lock = getMutex((__u64) user_cmd->offset); 
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
         obj_lock = getMutex(copy.offset);
     else        
         return -EFAULT;
@@ -83,7 +83,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     printk("Calling npheap_getsize function.");
     struct node *object;
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
         object = getObject(copy.offset);
     else        
         return -EFAULT;
@@ -98,7 +98,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
     printk("Calling npheap_delete function.");
     struct node *object;
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
         object = getObject(copy.offset);
     else        
         return -EFAULT;
