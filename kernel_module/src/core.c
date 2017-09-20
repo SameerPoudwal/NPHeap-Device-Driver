@@ -45,7 +45,7 @@
 
 extern struct miscdevice npheap_dev;
 
-typedef struct node node;
+typedef struct node k_node;
 
 typedef struct mutex p_lock;
 
@@ -56,41 +56,42 @@ struct node {
     void* k_virtual_addr;
     //pthread_mutex_t lock;
     p_lock *lock;
-    node *next = NULL;
+    k_node *next = NULL;
 }*k_head_list = NULL;
 
 
 
-node createObject(__u64 offset)
+k_node createObject(__u64 offset)
 {
     printk("Starting createObject function."); 
-    struct node *newNode = (node *)kmalloc(sizeof(struct node), GFP_KERNEL);
-    struct node *temp = k_head_list;
+    
+    struct node *newNode = (k_node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     newNode->objectId = offset;
     newNode->size = 0;
-    newNode->lock = PTHREAD_MUTEX_INITIALIZER;
+    newNode->lock = (p_lock *)kmalloc(sizeof(struct mutex), GFP_KERNEL);
     newNode->k_virtual_addr = NULL;
     if(k_head_list == NULL)
         {
             head = newNode;
             return head;
         }
-    else
-        while(temp->next!=NULL)
-        {
+    else{
+        struct node *temp = &k_head_list;
+        while(temp->next!=NULL){
             temp = temp->next;
         }
         temp->next = newNode;
         newNode->next = NULL;
         return newNode;
+    }
 }
 
 
 
-node getObject(__u64 inputOffset)
+k_node getObject(__u64 inputOffset)
 {
     printk("Starting getObject function.");    
-    struct node* temp = k_head_list;
+    struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
         if(temp->offset==inputOffset)
@@ -103,7 +104,7 @@ node getObject(__u64 inputOffset)
 p_lock getMutex(__u64 inputOffset)
 {
     printk("Starting getMutex function.");
-    struct node* temp = k_head_list;
+    struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
         if(temp->offset==inputOffset)
@@ -114,10 +115,10 @@ p_lock getMutex(__u64 inputOffset)
     return NULL;    
 }
 
-__u64 getSize(__u64 inputOffset)
+_u64 getSize(_u64 inputOffset)
 {
     printk("Starting getSize function.");
-    struct node* temp = k_head_list;
+    struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
         if(temp->offset==inputOffset)
@@ -131,7 +132,7 @@ __u64 getSize(__u64 inputOffset)
 
 void resetAddress(__u64 inputOffset)
 {
-    struct node* temp = k_head_list;
+    struct node* temp = &k_head_list;
     while(temp->next!=NULL)
     {
         if(temp->offset==inputOffset)
@@ -184,5 +185,3 @@ void npheap_exit(void)
 {
     misc_deregister(&npheap_dev);
 }
-API Training Shop Blog About
-© 2017 GitHub, Inc. Help Support
