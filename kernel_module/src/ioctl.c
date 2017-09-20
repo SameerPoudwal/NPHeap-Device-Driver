@@ -51,7 +51,7 @@
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_lock function.");
-    struct mutex obj_lock;
+    struct mutex *obj_lock;
     obj_lock = getMutex((__u64) user_cmd->offset); 
     mutex_lock(&obj_lock);
     return 0;
@@ -60,7 +60,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_unlock function.");
-    struct mutex obj_lock;
+    struct mutex *obj_lock;
     obj_lock = getMutex((__u64) user_cmd->offset); 
     mutex_unlock(&obj_lock);
     return 0;
@@ -69,7 +69,7 @@ long npheap_unlock(struct npheap_cmd __user *user_cmd)
 long npheap_getsize(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_getsize function.");
-    struct node object;
+    struct node *object;
     object = getObject((__u64) user_cmd->offset);
     return (long) object.size;
 }
@@ -78,7 +78,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
 long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_delete function.");
-    struct node object;
+    struct node *object;
     object = getObject((__u64) ser_cmd->offset);
 
     object->size = 0;
