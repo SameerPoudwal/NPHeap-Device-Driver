@@ -48,6 +48,7 @@
 // mutex that will be shared among the threads
 // static DEFINE_MUTEX(k_mutex); 
 
+typedef struct node k_node;
 struct node* createObject(__u64 offset);
 struct node* getObject(__u64 inputOffset);
 struct mutex* getMutex(__u64 inputOffset);
@@ -97,7 +98,8 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
         return -EFAULT;
 
     //object = getObject((__u64) user_cmd->offset);
-    return (long) object->size;
+    //return (long) object->size;
+    return 0;
 }
 
 
