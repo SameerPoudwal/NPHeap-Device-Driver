@@ -61,7 +61,7 @@ struct node {
 
 
 
-struct node createObject(__u64 offset)
+struct node* createObject(__u64 offset)
 {
     printk("Starting createObject function."); 
     
@@ -89,7 +89,7 @@ struct node createObject(__u64 offset)
 
 
 
-struct node getObject(__u64 inputOffset)
+struct node* getObject(__u64 inputOffset)
 {
     printk("Starting getObject function.");    
     struct node* temp = &k_head_list;
@@ -102,7 +102,7 @@ struct node getObject(__u64 inputOffset)
     return NULL;    
 }
 
-struct mutex getMutex(__u64 inputOffset)
+struct mutex* getMutex(__u64 inputOffset)
 {
     printk("Starting getMutex function.");
     struct node* temp = &k_head_list;
