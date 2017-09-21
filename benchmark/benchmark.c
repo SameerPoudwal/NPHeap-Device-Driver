@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             fprintf(stderr,"Failed in npheap_alloc()\n");
             exit(1);
         }
-        memset(mapped_data, 0, size);
+     //   memset(mapped_data, 0, size);
         a = rand()+1;
         gettimeofday(&current_time, NULL);
         for(j = 0; j < size-10; j=strlen(mapped_data))
