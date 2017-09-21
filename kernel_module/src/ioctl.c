@@ -81,7 +81,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     printk("Starting npheap_getsize function. \n ");
     __u64 size;
     struct npheap_cmd copy;
-    if(!copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))==0){
         size = getSize(copy.offset/PAGE_SIZE);
         printk("Size : %llu \n", size);
         printk("Exiting Delete \n");
@@ -101,7 +101,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_delete function. \n");
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))==0){
         struct list_head *position;
         struct node *llist;
         list_for_each(position, &kernel_llist.list){
