@@ -46,47 +46,21 @@
 // If exist, return the data.
 
 // mutex that will be shared among the threads
-// static DEFINE_MUTEX(k_mutex); 
-
-typedef struct node k_node;
-struct node* createObject(__u64 offset);
-struct node* getObject(__u64 inputOffset);
-struct mutex* getMutex(__u64 inputOffset);
+static DEFINE_MUTEX(k_mutex); 
+extern struct node kernel_llist;
 __u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_lock function.");
-    struct mutex *obj_lock;
-    struct node *obj_node;
-    //obj_lock = getMutex((__u64) user_cmd->offset); 
-    struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
-        obj_node = getObject(copy.offset);
-        if(obj_node == NULL){
-            obj_node = createObject(copy.offset);
-        }
-        obj_lock = getMutex(copy.offset);
-    }
-    else        
-        return -EFAULT;
-
-    mutex_lock(&obj_lock);
+    mutex_lock(&k_mutex);
     return 0;
 }     
 
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_unlock function.");
-    struct mutex *obj_lock;
-    //obj_lock = getMutex((__u64) user_cmd->offset); 
-    struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
-        obj_lock = getMutex(copy.offset);
-    else        
-        return -EFAULT;
-
-    mutex_unlock(&obj_lock);
+    mutex_unlock(&k_mutex);
     return 0;
 }
 
@@ -96,7 +70,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     struct node *object;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
-        object = getObject(copy.offset);
+        object = getObject(copy.offset/PAGE_SIZE);
     else        
         return -EFAULT;
 
@@ -109,16 +83,42 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
 long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_delete function.");
-    struct node *object;
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
-        object = getObject(copy.offset);
+    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
+        struct list_head *position, *temp;
+        struct node *llist;
+        list_for_each_safe(position, temp, &kernel_llist.list){
+            llist = list_entry(position, struct node, list);
+            printk("Freeing item");
+            if(llist->objectId == (copy.offset/PAGE_SIZE)){
+                list_del(position);
+                kfree(llist);
+            }
+        }
+    }
     else        
         return -EFAULT;
-
     //object->size = 0;
     //object->k_virtual_addr = NULL;
     return 0;
+}
+
+
+//function to get size
+__u64 getSize(__u64 inputOffset)
+{
+    printk("Starting getSize function.");   
+    struct list_head *position;
+    struct node *llist;
+
+    printk("Searching size for Offset -> " + inputOffset);
+
+    list_for_each(position, &kernel_llist.list){
+        llist = list_entry(position, struct node, list);
+        if(llist->objectId == inputOffset)
+            return llist->size;
+    }
+    return -1;    
 }
 
 long npheap_ioctl(struct file *filp, unsigned int cmd,
