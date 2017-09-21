@@ -48,6 +48,16 @@
 // mutex that will be shared among the threads
 static DEFINE_MUTEX(k_mutex); 
 extern struct node kernel_llist;
+
+// structure redefine
+struct node {
+    __u64 objectId;
+    __u64 size;
+    __u64 start;
+    void* k_virtual_addr;
+    struct list_head list;
+};
+
 __u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
