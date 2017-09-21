@@ -109,7 +109,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         __u64 size = vma->vm_end - vma->vm_start;
         printk("Printing MMAP size: %llu \n", size);
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
-        //memset(object->k_virtual_addr,0, size);
+        memset(object->k_virtual_addr,0, size);
         printk("################Memset Completed################");
         object->size = size;
         //__virt_to_phys
