@@ -44,8 +44,8 @@
 #include <linux/mutex.h>
 
 extern struct miscdevice npheap_dev;
-
 struct node kernel_llist;
+
 // Structure is ready
 struct node {
     __u64 objectId;
@@ -58,15 +58,16 @@ struct node {
 
 struct node* createObject(__u64 offset)
 {
-    printk("Starting createObject function."); 
+    printk("Starting createObject function. \n"); 
     struct node *newNode;
-    printk("Creating object for offset -> " + offset);
+    printk("Creating object for offset -> %llu \n", offset);
     newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     newNode->objectId = offset;
     newNode->size = 0;
     newNode->start = 0;
     newNode->k_virtual_addr = NULL;
     list_add(&(newNode->list), &(kernel_llist.list));
+    printk("Node created and added \n");
     return newNode;
 }
 
@@ -74,11 +75,11 @@ struct node* createObject(__u64 offset)
 
 struct node* getObject(__u64 inputOffset)
 {
-    printk("Starting getObject function.");    
+    printk("Starting getObject function. \n");    
     struct list_head *position;
     struct node *llist;
 
-    printk("Searching for Offset -> " + inputOffset);
+    printk("Searching for Offset -> %llu \n",inputOffset);
 
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
@@ -94,6 +95,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
     __u64 offset = vma->vm_pgoff;
     struct node *object;
 
+    printk("Entering into MMAP for offset -> %llu \n", offset);
     object = getObject(offset);
     if(object == NULL){
         object = createObject(offset);
@@ -104,9 +106,11 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
         object->size = size;
         //__virt_to_phys
+        printk("New ObjectID added \n");
         if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, size, vma->vm_page_prot) < 0)
             return -EAGAIN;
     }else{
+        printk("ObjectID already exists \n");
         if(remap_pfn_range(vma, object->start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, object->size, vma->vm_page_prot) < 0)
             return -EAGAIN;
     }
