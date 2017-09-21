@@ -62,21 +62,21 @@ __u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_lock function.");
+    printk("Calling npheap_lock function. \n");
     mutex_lock(&k_mutex);
     return 0;
 }     
 
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_unlock function.");
+    printk("Calling npheap_unlock function. \n");
     mutex_unlock(&k_mutex);
     return 0;
 }
 
 long npheap_getsize(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_getsize function.");
+    printk("Calling npheap_getsize function. \n");
     struct node *object;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
@@ -92,14 +92,14 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
 
 long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_delete function.");
+    printk("Calling npheap_delete function. \n");
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
         struct list_head *position;
         struct node *llist;
         list_for_each(position, &kernel_llist.list){
             llist = list_entry(position, struct node, list);
-            printk("Freeing item");
+            printk("Freeing item \n");
             if(llist->objectId == (copy.offset/PAGE_SIZE)){
                 list_del(position);
                 kfree(llist);
@@ -117,11 +117,11 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
 //function to get size
 __u64 getSize(__u64 inputOffset)
 {
-    printk("Starting getSize function.");   
+    printk("Starting getSize function. \n");   
     struct list_head *position;
     struct node *llist;
 
-    printk("Searching size for Offset -> " + inputOffset);
+    printk("Searching size for Offset -> %llu \n",inputOffset);
 
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
