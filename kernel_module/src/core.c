@@ -50,7 +50,6 @@ struct node kernel_llist;
 struct node {
     __u64 objectId;
     __u64 size;
-    __u64 start;
     void* k_virtual_addr;
     struct mutex *objLock;
     struct list_head list;
@@ -65,7 +64,6 @@ struct node* createObject(__u64 offset)
     newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     newNode->objectId = offset;
     newNode->size = 0;
-    newNode->start = 0;
     newNode->k_virtual_addr = NULL;
     mutex_init(&(newNode->objLock));
     list_add(&(newNode->list), &(kernel_llist.list));
@@ -95,7 +93,7 @@ struct node* getObject(__u64 inputOffset)
 int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
     printk("Starting npheap_mmap function. \n");  
-    __u64 offset = vma->vm_pgoff<<PAGE_SHIFT;
+    __u64 offset = vma->vm_pgoff;
     struct node *object;
 
     printk("Entering into MMAP for offset -> %llu \n", offset);
@@ -110,7 +108,6 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         memset(object->k_virtual_addr,0, size);
         printk("################Memset Completed################");
         object->size = size;
-        object->start = vma->vm_start;
         //__virt_to_phys
         printk(KERN_INFO "New ObjectID added \n");
         if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, size, vma->vm_page_prot) < 0){
@@ -119,7 +116,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         }
     }else{
         printk(KERN_INFO "ObjectID already exists with size: %llu \n", object->size);
-        if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, object->size, vma->vm_page_prot) < 0){
+        if(remap_pfn_range(vma, vma->vm_start, virt_to_phys(object->k_virtual_addr)>>PAGE_SHIFT, object->size, vma->vm_page_prot) < 0){
             printk(KERN_ERR "Existing remap failed");
             return -EAGAIN;
         }

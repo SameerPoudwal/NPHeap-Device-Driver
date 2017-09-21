@@ -43,23 +43,20 @@
 #include <linux/poll.h>
 #include <linux/mutex.h>
 
-// If exist, return the data.
-
 // mutex that will be shared among the threads
 static DEFINE_MUTEX(k_mutex); 
+
 extern struct node kernel_llist;
 
 // structure redefine
 struct node {
     __u64 objectId;
     __u64 size;
-    __u64 start;
     void* k_virtual_addr;
     struct mutex *objLock;
     struct list_head list;
 };
 
-__u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
@@ -82,11 +79,11 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     printk("Starting npheap_getsize function. \n ");
     __u64 size;
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))==0){
-        size = getSize(copy.offset/PAGE_SIZE);
+    if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
+        size = getSize((__u64)copy.offset/PAGE_SIZE);
         printk("Size : %llu \n", size);
         printk("Exiting npheap_getsize \n");
-        return size;
+        return (long) size;
     }
     else{ 
         printk(KERN_ERR "copy_from_user failed in getsize \n" );       
@@ -143,7 +140,7 @@ __u64 getSize(__u64 inputOffset)
             return size;
          }
     }
-    return 0;    
+    return size;    
 }
 
 long npheap_ioctl(struct file *filp, unsigned int cmd,
