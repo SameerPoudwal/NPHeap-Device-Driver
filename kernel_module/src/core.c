@@ -105,8 +105,8 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
     if(object->size == 0){
         __u64 size = vma->vm_end - vma->vm_start;
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
-        memset(object->k_virtual_addr,0, size);
-        printk("################Memset completed################");
+        //memset(object->k_virtual_addr,0, size);
+        printk("################Memset Skipped################");
         object->size = size;
         object->start = vma->vm_start;
         //__virt_to_phys
