@@ -45,7 +45,7 @@
 
 extern struct miscdevice npheap_dev;
 
-extern struct node kernel_llist;
+struct node kernel_llist;
 // Structure is ready
 struct node {
     __u64 objectId;
