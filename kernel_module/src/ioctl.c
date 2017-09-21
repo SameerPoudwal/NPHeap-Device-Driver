@@ -83,8 +83,10 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
         size = getSize(copy.offset/PAGE_SIZE);
         return size;
     }
-    else        
+    else{ 
+        printk(KERN_ERR "copy_from_user failed in getsize");       
         return -EFAULT;
+    }
 
     //object = getObject((__u64) user_cmd->offset);
     //return (long) object->size;
@@ -107,8 +109,10 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
             }
         }
     }
-    else        
+    else{    
+        printk(KERN_ERR "copy_from_user failed in delete")    
         return -EFAULT;
+    }
     //object->size = 0;
     //object->k_virtual_addr = NULL;
     return 0;
