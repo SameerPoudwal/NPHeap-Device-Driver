@@ -83,8 +83,10 @@ struct node* getObject(__u64 inputOffset)
 
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
-        if(llist->objectId == inputOffset)
+        if(llist->objectId == inputOffset){
+            printk("Object found. \n");
             return llist;
+        }
     }
     return NULL;
 }
@@ -104,6 +106,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 
     if(object->size == 0){
         __u64 size = vma->vm_end - vma->vm_start;
+        printk("Printing MMAP size: %llu \n", size);
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
         memset(object->k_virtual_addr,0, size);
         printk("################Memset Completed################");
