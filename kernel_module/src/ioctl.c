@@ -84,7 +84,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))==0){
         size = getSize(copy.offset/PAGE_SIZE);
         printk("Size : %llu \n", size);
-        printk("Exiting Delete \n");
+        printk("Exiting npheap_getsize \n");
         return size;
     }
     else{ 
@@ -136,8 +136,8 @@ __u64 getSize(__u64 inputOffset)
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
         if(llist->objectId == inputOffset){
-            printk("Size of offset(object ID) %llu is %llu \n",llist->objectId,llist->size);
-            return llist->size;
+            printk("Size of offset(object ID) %llu is %llu \n Exiting getSize \n",llist->objectId,llist->size);
+            return &(llist->size);
          }
     }
     return -1;    
