@@ -92,7 +92,7 @@ struct node* getObject(__u64 inputOffset)
 // Memory Allocation is ready
 int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
-
+    printk("Starting npheap_mmap function. \n");  
     __u64 offset = vma->vm_pgoff;
     struct node *object;
 

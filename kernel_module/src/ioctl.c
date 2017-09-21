@@ -62,29 +62,33 @@ __u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_lock function. \n");
+    printk("Starting npheap_lock function. \n");
     mutex_lock(&k_mutex);
+    printk("locked \n");
     return 0;
 }     
 
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_unlock function. \n");
+    printk("Starting npheap_lock function. \n");
     mutex_unlock(&k_mutex);
+    printk("Unlocked\n");
     return 0;
 }
 
 long npheap_getsize(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_getsize function. \n");
+    printk("Starting npheap_getsize function. \n");
     __u64 size;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
         size = getSize(copy.offset/PAGE_SIZE);
+        printk("Size : %llu \n", size);
+        printk("Exiting Delete \n")
         return size;
     }
     else{ 
-        printk(KERN_ERR "copy_from_user failed in getsize");       
+        printk(KERN_ERR "copy_from_user failed in getsize \n" );       
         return -EFAULT;
     }
 
@@ -95,22 +99,23 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
 
 long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
-    printk("Calling npheap_delete function. \n");
+    printk("Starting npheap_delete function. \n");
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
         struct list_head *position;
         struct node *llist;
         list_for_each(position, &kernel_llist.list){
             llist = list_entry(position, struct node, list);
-            printk("Freeing item \n");
+            
             if(llist->objectId == (copy.offset/PAGE_SIZE)){
                 list_del(position);
                 kfree(llist);
+                printk("Freed offset(object ID) :%llu \n Exiting Delete",llist->objectId);
             }
         }
     }
     else{    
-        printk(KERN_ERR "copy_from_user failed in delete");    
+        printk(KERN_ERR "copy_from_user failed in delete \n");    
         return -EFAULT;
     }
     //object->size = 0;
@@ -130,8 +135,10 @@ __u64 getSize(__u64 inputOffset)
 
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
-        if(llist->objectId == inputOffset)
+        if(llist->objectId == inputOffset){
+            printk("Size of offset(object ID) %llu is %llu \n",llist->objectId,llist->size);
             return llist->size;
+         }
     }
     return -1;    
 }
