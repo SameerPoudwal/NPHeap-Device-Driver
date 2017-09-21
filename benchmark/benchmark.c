@@ -12,9 +12,9 @@
 
 int main(int argc, char *argv[])
 {
-    int i=0,number_of_processes = 1, number_of_objects=1024, number_of_transactions = 65536,j; 
+    int i=0,number_of_processes = 1, number_of_objects=1024, max_size_of_objects = 8192 ,j; 
     int a;
-    int pid;
+    int pid=-1;
     int size;
     char data[8192];
     char filename[256];
@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
     struct timeval current_time;
     if(argc < 3)
     {
-        fprintf(stderr, "Usage: %s number_of_objects number_of_transactions number_of_processes\n",argv[0]);
+        fprintf(stderr, "Usage: %s number_of_objects max_size_of_objects number_of_processes\n",argv[0]);
         exit(1);
     }
     number_of_objects = atoi(argv[1]);
-    number_of_transactions = atoi(argv[2]);
+    max_size_of_objects = atoi(argv[2]);
     number_of_processes = atoi(argv[3]);
     devfd = open("/dev/npheap",O_RDWR);
     if(devfd < 0)
@@ -43,16 +43,16 @@ int main(int argc, char *argv[])
     {
         pid=fork();
     }
-    sprintf(filename,"npheap.%d.log",pid);
+    sprintf(filename,"npheap.%d.log",(int)getpid());
     fp = fopen(filename,"w");
     for(i = 0; i < number_of_objects; i++)
     {
         npheap_lock(devfd,i);
-        do 
+        size = npheap_getsize(devfd,i);
+        while(size ==0 || size <= 10)
         {
-            size = rand()%(8192);
+            size = rand() % max_size_of_objects;
         }
-        while(size ==0);
         mapped_data = (char *)npheap_alloc(devfd,i,size);
         if(!mapped_data)
         {
@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
         fprintf(fp,"S\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
         npheap_unlock(devfd,i);
     }
-/*    
+    
     // try delete something
-    i = rand()%256;
+    /*i = rand()%256;
     npheap_lock(devfd,i);
     npheap_delete(devfd,i);
     fprintf(fp,"D\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
@@ -81,4 +81,3 @@ int main(int argc, char *argv[])
         wait(NULL);
     return 0;
 }
-
