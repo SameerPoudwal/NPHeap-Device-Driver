@@ -105,12 +105,13 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         __u64 size = vma->vm_end - vma->vm_start;
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
         object->size = size;
+        object->start = vma->vm_start;
         //__virt_to_phys
-        printk("New ObjectID added \n");
+        printk(KERN_INFO "New ObjectID added \n");
         if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, size, vma->vm_page_prot) < 0)
             return -EAGAIN;
     }else{
-        printk("ObjectID already exists \n");
+        printk(KERN_INFO "ObjectID already exists \n");
         if(remap_pfn_range(vma, object->start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, object->size, vma->vm_page_prot) < 0)
             return -EAGAIN;
     }
