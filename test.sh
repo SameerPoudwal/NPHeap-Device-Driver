@@ -20,5 +20,5 @@ sudo chmod 777 /dev/npheap
 cat *.log > trace
 sort -n -t 3 trace > sorted_trace
 ./benchmark/validate 32 < sorted_trace
-rm -f *.log
+#rm -f *.log
 sudo rmmod npheap
