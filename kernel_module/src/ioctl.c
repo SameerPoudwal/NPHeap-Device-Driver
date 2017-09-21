@@ -70,7 +70,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
-    printk("Starting npheap_lock function. \n");
+    printk("Starting npheap_unlock function. \n");
     mutex_unlock(&k_mutex);
     printk("Unlocked\n");
     return 0;
@@ -130,7 +130,7 @@ __u64 getSize(__u64 inputOffset)
     printk("Starting getSize function. \n");   
     struct list_head *position;
     struct node *llist;
-    __u64 size;
+    __u64 size = 0;
 
     printk("Searching size for Offset -> %llu \n",inputOffset);
 
