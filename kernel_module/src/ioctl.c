@@ -57,6 +57,7 @@ struct node {
     struct list_head list;
 };
 
+__u64 getSize(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
