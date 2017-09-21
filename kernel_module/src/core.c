@@ -113,13 +113,13 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         object->size = size;
         //__virt_to_phys
         printk(KERN_INFO "New ObjectID added \n");
-        if(remap_pfn_range(vma, vma->vm_start, __pa((object->k_virtual_addr)>>PAGE_SHIFT), (unsigned long) size, vma->vm_page_prot) < 0){
+        if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) size, vma->vm_page_prot) < 0){
             printk(KERN_ERR "New remap failed");
             return -EAGAIN;
         }
     }else{
         printk(KERN_INFO "ObjectID already exists with size: %llu \n", object->size);
-        if(remap_pfn_range(vma, vma->vm_start, virt_to_phys((object->k_virtual_addr)>>PAGE_SHIFT), (unsigned long) object->size, vma->vm_page_prot) < 0){
+        if(remap_pfn_range(vma, vma->vm_start, virt_to_phys(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) object->size, vma->vm_page_prot) < 0){
             printk(KERN_ERR "Existing remap failed");
             return -EAGAIN;
         }
