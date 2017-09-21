@@ -77,16 +77,16 @@ long npheap_unlock(struct npheap_cmd __user *user_cmd)
 long npheap_getsize(struct npheap_cmd __user *user_cmd)
 {
     printk("Calling npheap_getsize function. \n");
-    struct node *object;
+    __u64 size;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
-        object = getSize(copy.offset/PAGE_SIZE);
+        size = getSize(copy.offset/PAGE_SIZE);
+        return size;
     else        
         return -EFAULT;
 
     //object = getObject((__u64) user_cmd->offset);
     //return (long) object->size;
-    return 0;
 }
 
 
