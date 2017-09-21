@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
             size = rand() % max_size_of_objects;
         }
         mapped_data = (char *)npheap_alloc(devfd,i,size);
-        fprintf(stdout, "Mapped Data is %s \n",mapped_data);
         if(!mapped_data)
         {
             fprintf(stderr,"Failed in npheap_alloc()\n");
@@ -69,22 +68,23 @@ int main(int argc, char *argv[])
             sprintf(mapped_data,"%s%d",mapped_data,a);
         }
         fprintf(fp,"S\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
+        fprintf(stdout, "Mapped Data is %s \n",mapped_data);
         npheap_unlock(devfd,i);
     }
     
     // try delete something
     i = rand()%256;
-    /*
+    
     npheap_lock(devfd,i);
     npheap_delete(devfd,i);
     fprintf(fp,"D\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
     npheap_unlock(devfd,i);
-    */
+    
     close(devfd);
     while (pid = waitpid(-1, NULL, 0)) {
-           if (errno == ECHILD) {
-                     break;
-                        }
+        if (errno == ECHILD) {
+            break;
+        }
     }
     return 0;
 }

@@ -62,7 +62,18 @@ __u64 getSize(__u64 inputOffset);
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_lock function. \n");
-    mutex_lock(&k_mutex);
+
+    struct mutex *lock;
+    struct npheap_cmd copy;
+    if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
+        lock = getLock(copy.offset/PAGE_SIZE);
+        mutex_lock(&lock);
+    }else{
+        printk(KERN_ERR "copy_from_user failed in Lock \n" );       
+        return -EFAULT;
+    }
+
+    //mutex_lock(&k_mutex);
     printk("locked \n");
     return 0;
 }     
@@ -70,7 +81,19 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_unlock function. \n");
-    mutex_unlock(&k_mutex);
+
+    struct mutex *lock;
+    struct npheap_cmd copy;
+    if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
+        lock = getLock(copy.offset/PAGE_SIZE);
+        mutex_unlock(&lock);
+    }else{
+        printk(KERN_ERR "copy_from_user failed in unLock \n" );       
+        return -EFAULT;
+    }
+
+
+    //mutex_unlock(&k_mutex);
     printk("Unlocked\n");
     return 0;
 }
@@ -84,7 +107,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
         size = getSize((__u64)copy.offset/PAGE_SIZE);
         printk("Size : %llu \n", size);
         printk("Exiting npheap_getsize \n");
-        return (long) size;
+        return (int) size;
     }
     else{ 
         printk(KERN_ERR "copy_from_user failed in getsize \n" );       
@@ -100,7 +123,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_delete function. \n");
     struct npheap_cmd copy;
-    if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))==0){
+    if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
         struct list_head *position;
         struct node *llist;
         list_for_each(position, &kernel_llist.list){
@@ -108,6 +131,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
             
             if(llist->objectId == (copy.offset/PAGE_SIZE)){
                 list_del(position);
+                kfree(llist->k_virtual_addr);
                 kfree(llist);
                 printk("Freed offset(object ID) :%llu \n Exiting Delete",llist->objectId);
             }
@@ -144,6 +168,22 @@ __u64 getSize(__u64 inputOffset)
     return size;    
 }
 
+struct mutex* getLock(__u64 inputOffset){
+    printk("Starting getLock function");
+    struct list_head *position;
+    struct node *llist;
+
+    printk("Searching lock for Offset -> %llu \n",inputOffset);
+
+    list_for_each(position, &kernel_llist.list){
+        llist = list_entry(position, struct node, list);
+        if(llist->objectId == inputOffset){
+            return llist->objLock;
+         }
+    }
+    return NULL;
+}
+
 long npheap_ioctl(struct file *filp, unsigned int cmd,
                                 unsigned long arg)
 {
@@ -160,3 +200,8 @@ long npheap_ioctl(struct file *filp, unsigned int cmd,
         return -ENOTTY;
     }
 }
+
+
+//References:
+//1. Linked List: https://isis.poly.edu/kulesh/stuff/src/klist/
+//2. Mutex: http://elixir.free-electrons.com/linux/v4.4/source/include/linux/mutex.h
