@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
     int i=0,number_of_processes = 1, number_of_objects=1024, max_size_of_objects = 8192 ,j; 
     int a;
-    int pid=-1;
+    int pid;
     int size;
     char data[8192];
     char filename[256];
@@ -37,11 +37,11 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Device open failed");
         exit(1);
     }
-    srand((int)time(NULL)+(int)getpid());
     // Writing to objects
     for(i=0;i<(number_of_processes-1) && pid != 0;i++)
     {
         pid=fork();
+        srand((int)time(NULL)+(int)getpid());
     }
     sprintf(filename,"npheap.%d.log",(int)getpid());
     fp = fopen(filename,"w");
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             fprintf(stderr,"Failed in npheap_alloc()\n");
             exit(1);
         }
-//        memset(mapped_data, 0, 4096);
+        memset(mapped_data, 0, size);
         a = rand()+1;
         gettimeofday(&current_time, NULL);
         for(j = 0; j < size-10; j=strlen(mapped_data))
@@ -72,11 +72,13 @@ int main(int argc, char *argv[])
     }
     
     // try delete something
-    /*i = rand()%256;
+    i = rand()%256;
+    /*
     npheap_lock(devfd,i);
     npheap_delete(devfd,i);
     fprintf(fp,"D\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
-    npheap_unlock(devfd,i);*/
+    npheap_unlock(devfd,i);
+    */
     close(devfd);
     if(pid != 0)
         wait(NULL);
