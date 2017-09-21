@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
     int i=0,number_of_processes = 1, number_of_objects=1024, max_size_of_objects = 8192 ,j; 
     int a;
-    int pid;
+    int pid=-1;
     int size;
     char data[8192];
     char filename[256];
