@@ -72,7 +72,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
 
         printk("%llu Offset ID in lock", (copy.offset/PAGE_SIZE));
-        obj = getObject((__u64)copy.offset/PAGE_SIZE));
+        obj = getObject((__u64)copy.offset/PAGE_SIZE);
 
         if(obj == NULL){
             createObject((__u64)copy.offset/PAGE_SIZE);
