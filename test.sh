@@ -16,7 +16,7 @@ sudo make validate
 cd ..
 sudo insmod kernel_module/npheap.ko
 sudo chmod 777 /dev/npheap
-./benchmark/benchmark 64 8192 2 
+./benchmark/benchmark 64 8192 1
 cat *.log > trace
 sort -n -t 3 trace > sorted_trace
 ./benchmark/validate 64 < sorted_trace
