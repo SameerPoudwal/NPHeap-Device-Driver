@@ -9,6 +9,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 int main(int argc, char *argv[])
 {
@@ -80,7 +81,10 @@ int main(int argc, char *argv[])
     npheap_unlock(devfd,i);
     */
     close(devfd);
-    if(pid != 0)
-        wait(NULL);
+    while (pid = waitpid(-1, NULL, 0)) {
+           if (errno == ECHILD) {
+                     break;
+                        }
+    }
     return 0;
 }
