@@ -66,7 +66,7 @@ struct node* createObject(__u64 offset)
     newNode->objectId = offset;
     newNode->size = 0;
     newNode->start = 0;
-    init_MUTEX(&(newNode->objLock));
+   // init_MUTEX(&(newNode->objLock));
     newNode->k_virtual_addr = NULL;
     list_add(&(newNode->list), &(kernel_llist.list));
     printk("Node created and added \n");
