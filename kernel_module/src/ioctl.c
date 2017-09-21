@@ -110,7 +110,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
         }
     }
     else{    
-        printk(KERN_ERR "copy_from_user failed in delete")    
+        printk(KERN_ERR "copy_from_user failed in delete");    
         return -EFAULT;
     }
     //object->size = 0;
