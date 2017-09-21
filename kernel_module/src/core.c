@@ -66,8 +66,8 @@ struct node* createObject(__u64 offset)
     newNode->objectId = offset;
     newNode->size = 0;
     newNode->start = 0;
-   // init_MUTEX(&(newNode->objLock));
     newNode->k_virtual_addr = NULL;
+    mutex_init(&(newNode->objLock));
     list_add(&(newNode->list), &(kernel_llist.list));
     printk("Node created and added \n");
     return newNode;
@@ -95,7 +95,7 @@ struct node* getObject(__u64 inputOffset)
 int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
     printk("Starting npheap_mmap function. \n");  
-    __u64 offset = vma->vm_pgoff;
+    __u64 offset = vma->vm_pgoff<<PAGE_SHIFT;
     struct node *object;
 
     printk("Entering into MMAP for offset -> %llu \n", offset);
