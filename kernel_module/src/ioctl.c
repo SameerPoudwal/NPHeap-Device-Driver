@@ -59,6 +59,7 @@ struct node {
 
 __u64 getSize(__u64 inputOffset);
 struct mutex* getLock(__u64 inputOffset);
+void createObject(__u64 offset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
@@ -66,7 +67,16 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 
     struct mutex *lock;
     struct npheap_cmd copy;
+    struct node *obj;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
+
+        obj = getObject(inputOffset);
+
+        if(obj == NULL){
+            createObject(inputOffset);
+            obj= getObject(inputOffset);
+        }
+        
         lock = getLock(copy.offset/PAGE_SIZE);
         mutex_lock(&lock);
     }else{
