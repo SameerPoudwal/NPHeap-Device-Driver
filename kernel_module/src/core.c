@@ -105,6 +105,8 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         object = getObject(offset);
     }
 
+    printk("Value offset %llu and returned value %llu", offset, object->objectId);
+
     if(object->size == 0){
         __u64 size = vma->vm_end - vma->vm_start;
         printk("Printing MMAP size: %llu \n", size);
