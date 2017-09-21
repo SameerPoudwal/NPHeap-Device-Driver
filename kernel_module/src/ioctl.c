@@ -84,7 +84,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
         size = getSize(copy.offset/PAGE_SIZE);
         printk("Size : %llu \n", size);
-        printk("Exiting Delete \n")
+        printk("Exiting Delete \n");
         return size;
     }
     else{ 
