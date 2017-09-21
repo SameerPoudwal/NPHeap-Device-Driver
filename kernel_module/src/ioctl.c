@@ -55,6 +55,7 @@ struct node {
     __u64 size;
     __u64 start;
     void* k_virtual_addr;
+    struct mutex *objLock;
     struct list_head list;
 };
 
