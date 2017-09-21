@@ -71,11 +71,12 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
     struct node *obj;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
 
-        obj = getObject(copy.offset/PAGE_SIZE);
+        printk("%llu Offset ID in lock", (copy.offset/PAGE_SIZE));
+        obj = getObject((_u64)copy.offset/PAGE_SIZE);
 
         if(obj == NULL){
-            createObject(copy.offset/PAGE_SIZE);
-            obj= getObject(copy.offset/PAGE_SIZE);
+            createObject((_u64)copy.offset/PAGE_SIZE);
+            obj= getObject((_u64)copy.offset/PAGE_SIZE);
         }
 
         lock = getLock(copy.offset/PAGE_SIZE);
