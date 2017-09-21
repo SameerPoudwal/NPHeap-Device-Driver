@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
             size = rand() % max_size_of_objects;
         }
         mapped_data = (char *)npheap_alloc(devfd,i,size);
-        fprintf(stdout, mapped_data);
+        fprintf(stdout, "Mapped Data is %s \n",mapped_data);
         if(!mapped_data)
         {
             fprintf(stderr,"Failed in npheap_alloc()\n");
