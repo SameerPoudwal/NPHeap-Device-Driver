@@ -58,6 +58,7 @@ struct node {
 };
 
 __u64 getSize(__u64 inputOffset);
+struct mutex* getLock(__u64 inputOffset);
 
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
