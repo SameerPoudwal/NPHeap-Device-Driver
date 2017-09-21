@@ -70,7 +70,7 @@ long npheap_getsize(struct npheap_cmd __user *user_cmd)
     struct node *object;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd)))
-        object = getObject(copy.offset/PAGE_SIZE);
+        object = getSize(copy.offset/PAGE_SIZE);
     else        
         return -EFAULT;
 
@@ -85,9 +85,9 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
     printk("Calling npheap_delete function.");
     struct npheap_cmd copy;
     if(copy_from_user(&copy, (void __user *)user_cmd, sizeof(struct npheap_cmd))){
-        struct list_head *position, *temp;
+        struct list_head *position;
         struct node *llist;
-        list_for_each_safe(position, temp, &kernel_llist.list){
+        list_for_each(position, &kernel_llist.list){
             llist = list_entry(position, struct node, list);
             printk("Freeing item");
             if(llist->objectId == (copy.offset/PAGE_SIZE)){
