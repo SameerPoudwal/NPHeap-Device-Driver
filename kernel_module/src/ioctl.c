@@ -130,6 +130,7 @@ __u64 getSize(__u64 inputOffset)
     printk("Starting getSize function. \n");   
     struct list_head *position;
     struct node *llist;
+    __u64 size;
 
     printk("Searching size for Offset -> %llu \n",inputOffset);
 
@@ -137,10 +138,11 @@ __u64 getSize(__u64 inputOffset)
         llist = list_entry(position, struct node, list);
         if(llist->objectId == inputOffset){
             printk("Size of offset(object ID) %llu is %llu \n Exiting getSize \n",llist->objectId,llist->size);
-            return &(llist->size);
+            size = llist->size;
+            return size;
          }
     }
-    return -1;    
+    return 0;    
 }
 
 long npheap_ioctl(struct file *filp, unsigned int cmd,
