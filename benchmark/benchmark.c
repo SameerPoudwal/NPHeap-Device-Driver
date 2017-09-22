@@ -68,7 +68,6 @@ int main(int argc, char *argv[])
             sprintf(mapped_data,"%s%d",mapped_data,a);
         }
         fprintf(fp,"S\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
-        fprintf(stdout, "Mapped Data is %s \n",mapped_data);
         printf("PID: %d, Offset: %d, Size: %d", getpid(), i, size);
         npheap_unlock(devfd,i);
     }
