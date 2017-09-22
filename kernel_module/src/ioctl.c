@@ -70,7 +70,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
     struct node *obj;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
 
-        printk("%llu Offset ID in lock", (copy.offset/PAGE_SIZE));
+        printk("%llu Offset ID in lock \n", (copy.offset/PAGE_SIZE));
         obj = getObject((__u64)copy.offset/PAGE_SIZE);
 
         if(obj == NULL){
@@ -141,7 +141,7 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
                 //kfree(llist);
                 llist->size = 0;
                 llist->k_virtual_addr=NULL;
-                printk("Freed offset(object ID) :%llu \n Exiting Delete",llist->objectId);
+                printk("Freed offset(object ID) :%llu \n Exiting Delete \n" ,llist->objectId);
             }
         }
     }

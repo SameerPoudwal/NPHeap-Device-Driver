@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     }
     
     // try delete something
-    i = rand()%256;
+    i = rand()%5;
     
     npheap_lock(devfd,i);
     npheap_delete(devfd,i);
