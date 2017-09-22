@@ -47,6 +47,7 @@
 //static DEFINE_MUTEX(k_mutex); 
 
 extern struct node kernel_llist;
+extern struct mutex list_lock;
 
 // structure redefine
 struct node {
@@ -132,18 +133,20 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
         struct list_head *position;
         struct node *llist;
-        list_for_each(position, &kernel_llist.list){
-            llist = list_entry(position, struct node, list);
-            
-            if(llist->objectId == (copy.offset/PAGE_SIZE)){
-                //list_del(position);
-                kfree(llist->k_virtual_addr);
-                //kfree(llist);
-                llist->size = 0;
-                llist->k_virtual_addr=NULL;
-                printk("Freed offset(object ID) :%llu \n Exiting Delete \n" ,llist->objectId);
-            }
+        
+        llist = getObject(copy.offset/PAGE_SIZE);
+        
+        if(llist != NULL){
+            mutex_lock(&list_lock);
+            kfree(llist->k_virtual_addr);
+            //kfree(llist);
+            llist->size = 0;
+            llist->k_virtual_addr=NULL;
+            mutex_unlock(&list_lock);
+            printk("Freed offset(object ID) :%llu \n Exiting Delete \n" ,llist->objectId);
         }
+       
+        
     }
     else{    
         printk(KERN_ERR "copy_from_user failed in delete \n");    
@@ -165,15 +168,11 @@ __u64 getSize(__u64 inputOffset)
 
     printk("Searching size for Offset -> %llu \n",inputOffset);
 
-    list_for_each(position, &kernel_llist.list){
-        llist = list_entry(position, struct node, list);
-        if(llist->objectId == inputOffset){
-            printk("Size of offset(object ID) %llu is %llu \n Exiting getSize \n",llist->objectId,llist->size);
-            size = llist->size;
-            return size;
-         }
+    llist = getObject(inputOffset);
+    if(llist != NULL){
+        size = llist->size;
     }
-    return size;    
+    return size;
 }
 
 /*

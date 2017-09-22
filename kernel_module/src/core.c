@@ -45,6 +45,7 @@
 
 extern struct miscdevice npheap_dev;
 struct node kernel_llist;
+struct mutex list_lock;
 
 // Structure is ready
 struct node {
@@ -66,7 +67,11 @@ void createObject(__u64 offset)
     newNode->size = 0;
     newNode->k_virtual_addr = NULL;
     mutex_init(&(newNode->objLock));
+    
+    mutex_lock(&list_lock);
     list_add(&(newNode->list), &(kernel_llist.list));
+    mutex_unlock(&list_lock);
+
     printk("Node created and added \n");
 }
 
@@ -80,13 +85,16 @@ struct node* getObject(__u64 inputOffset)
 
     printk("Searching for Offset -> %llu \n",inputOffset);
 
+    mutex_lock(&list_lock);
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
         if(llist->objectId == inputOffset){
             printk("Object found. \n");
+            mutex_unlock(&list_lock);
             return llist;
         }
     }
+    mutex_unlock(&list_lock);
     return NULL;
 }
 
@@ -131,6 +139,7 @@ int npheap_init(void)
     else{
         printk(KERN_ERR "\"npheap\" misc device installed\n");
         INIT_LIST_HEAD(&kernel_llist.list);
+        mutex_init(&list_lock);
     }
     return ret;
 }
