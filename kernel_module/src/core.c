@@ -43,21 +43,26 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 #include <linux/mutex.h>
+#include <linux/list.h>
 
 extern struct miscdevice npheap_dev;
+
+// GLOBAL object for Kernel's Head List.
 struct node kernel_llist;
+// GLOBAL LOCK over LINKED LIST
 struct mutex list_lock;
 
-// Structure is ready
+// Node Structure
+// Kernel's linked list used
 struct node {
     __u64 objectId;
     __u64 size;
     void* k_virtual_addr;
     struct mutex objLock;
-    struct list_head list;
+    struct list_head list;          // contains *prev and *next only.
 };
 
-
+// Create functionality incorporated
 void createObject(__u64 offset)
 {
     printk("Starting createObject function. \n"); 
@@ -69,9 +74,12 @@ void createObject(__u64 offset)
     newNode->k_virtual_addr = NULL;
     mutex_init(&(newNode->objLock));
     
+
+    //GLOBAL LOCKING (on LinkedList)
     mutex_lock(&list_lock);
     list_add(&(newNode->list), &(kernel_llist.list));
     mutex_unlock(&list_lock);
+
 
     printk("Node created and added \n");
 }
@@ -86,6 +94,8 @@ struct node* getObject(__u64 inputOffset)
 
     printk("Searching for Offset -> %llu \n",inputOffset);
 
+
+    //GLOBAL LOCKING (on LinkedList)
     mutex_lock(&list_lock);
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
@@ -96,13 +106,16 @@ struct node* getObject(__u64 inputOffset)
         }
     }
     mutex_unlock(&list_lock);
+
+
     return NULL;
 }
 
-// Memory Allocation is ready
+// System call for virtual and physical memory allocation
 int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
-    printk("Starting npheap_mmap function. \n");  
+    printk("Starting npheap_mmap function: \n");
+    // Constants to get *vma members  
     __u64 offset = vma->vm_pgoff;
     __u64 size = vma->vm_end - vma->vm_start;
     struct node *object;
@@ -115,16 +128,21 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         object = getObject(offset);
     }
 
+    /*
+    * Business Logic - If size = 0, it means that no memory is allocated for that 
+    * objectId. Thus, we will create virtual memory for that object id, using
+    * kmalloc.
+    */
     if(object->size == 0){
-        
         printk("Printing MMAP size: %llu \n", size);
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
+        //Memset called, whenever a new virtual address is created. [To clear garbage]
         memset(object->k_virtual_addr,0, size);
-        printk("################Memset Completed################");
+
         object->size = size;
-        //__virt_to_phys
-        printk(KERN_INFO "New ObjectID added \n");
+        printk(KERN_INFO "New ObjectID added into linkedlist. \n");
     }
+    //Virtual addr mapping / translation to Physical addr.
     if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) size, vma->vm_page_prot) < 0){
         printk(KERN_ERR "New remap failed");
         return -EAGAIN;
@@ -139,7 +157,10 @@ int npheap_init(void)
         printk(KERN_ERR "Unable to register \"npheap\" misc device\n");
     else{
         printk(KERN_ERR "\"npheap\" misc device installed\n");
+        
+        //Initializing kernel head list.
         INIT_LIST_HEAD(&kernel_llist.list);
+        //Initializing GLOBAL LOCK
         mutex_init(&list_lock);
     }
     return ret;
