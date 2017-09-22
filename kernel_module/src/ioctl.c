@@ -93,7 +93,7 @@ long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_unlock function. \n");
 
-    struct mutex *lock;
+    struct mutex lock;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
         lock = getLock(copy.offset/PAGE_SIZE);
