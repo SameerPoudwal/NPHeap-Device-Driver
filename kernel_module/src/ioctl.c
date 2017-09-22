@@ -58,7 +58,7 @@ struct node {
 };
 
 __u64 getSize(__u64 inputOffset);
-struct mutex getLock(__u64 inputOffset);
+//struct mutex getLock(__u64 inputOffset);
 void createObject(__u64 offset);
 struct node* getObject(__u64 inputOffset);
 
@@ -66,7 +66,6 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_lock function. \n");
 
-    struct mutex lock;
     struct npheap_cmd copy;
     struct node *obj;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
@@ -79,8 +78,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
             obj= getObject((__u64)copy.offset/PAGE_SIZE);
         }
 
-        lock = getLock(copy.offset/PAGE_SIZE);
-        mutex_lock(&lock);
+        mutex_lock(&(obj->objLock));
     }else{
         printk(KERN_ERR "copy_from_user failed in Lock \n" );       
         return -EFAULT;
@@ -92,16 +90,12 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_unlock function. \n");
-
-    struct mutex lock;
+    
+    struct node *obj;
     struct npheap_cmd copy;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
-        lock = getLock(copy.offset/PAGE_SIZE);
-        if(lock!=NULL){
-            mutex_unlock(&lock);
-        }
-        else
-            return 0;
+        obj= getObject((__u64)copy.offset/PAGE_SIZE);
+        mutex_unlock(&(obj->objLock));
     }else{
         printk(KERN_ERR "copy_from_user failed in unLock \n" );       
         return -EFAULT;
@@ -182,6 +176,7 @@ __u64 getSize(__u64 inputOffset)
     return size;    
 }
 
+/*
 struct mutex getLock(__u64 inputOffset){
     printk("Starting getLock function");
     struct list_head *position;
@@ -196,7 +191,7 @@ struct mutex getLock(__u64 inputOffset){
          }
     }
     return NULL;
-}
+}*/
 
 long npheap_ioctl(struct file *filp, unsigned int cmd,
                                 unsigned long arg)
