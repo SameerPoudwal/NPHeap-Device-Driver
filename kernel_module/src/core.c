@@ -51,7 +51,7 @@ struct node {
     __u64 objectId;
     __u64 size;
     void* k_virtual_addr;
-    struct mutex *objLock;
+    struct mutex objLock;
     struct list_head list;
 };
 
@@ -95,6 +95,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
     printk("Starting npheap_mmap function. \n");  
     __u64 offset = vma->vm_pgoff;
+    __u64 size = vma->vm_end - vma->vm_start;
     struct node *object;
 
     printk("Entering into MMAP for offset -> %llu \n", offset);
@@ -106,7 +107,7 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
     }
 
     if(object->size == 0){
-        __u64 size = vma->vm_end - vma->vm_start;
+        
         printk("Printing MMAP size: %llu \n", size);
         object->k_virtual_addr = kmalloc(size, GFP_KERNEL);
         memset(object->k_virtual_addr,0, size);
@@ -114,16 +115,10 @@ int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
         object->size = size;
         //__virt_to_phys
         printk(KERN_INFO "New ObjectID added \n");
-        if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) size, vma->vm_page_prot) < 0){
-            printk(KERN_ERR "New remap failed");
-            return -EAGAIN;
-        }
-    }else{
-        printk(KERN_INFO "ObjectID already exists with size: %llu \n", object->size);
-        if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) object->size, vma->vm_page_prot) < 0){
-            printk(KERN_ERR "Existing remap failed");
-            return -EAGAIN;
-        }
+    }
+    if(remap_pfn_range(vma, vma->vm_start, __pa(object->k_virtual_addr)>>PAGE_SHIFT, (unsigned long) size, vma->vm_page_prot) < 0){
+        printk(KERN_ERR "New remap failed");
+        return -EAGAIN;
     }
     return 0;
 }

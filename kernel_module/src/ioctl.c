@@ -44,7 +44,7 @@
 #include <linux/mutex.h>
 
 // mutex that will be shared among the threads
-static DEFINE_MUTEX(k_mutex); 
+//static DEFINE_MUTEX(k_mutex); 
 
 extern struct node kernel_llist;
 
@@ -53,12 +53,12 @@ struct node {
     __u64 objectId;
     __u64 size;
     void* k_virtual_addr;
-    struct mutex *objLock;
+    struct mutex objLock;
     struct list_head list;
 };
 
 __u64 getSize(__u64 inputOffset);
-struct mutex* getLock(__u64 inputOffset);
+struct mutex getLock(__u64 inputOffset);
 void createObject(__u64 offset);
 struct node* getObject(__u64 inputOffset);
 
@@ -66,7 +66,7 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
     printk("Starting npheap_lock function. \n");
 
-    struct mutex *lock;
+    struct mutex lock;
     struct npheap_cmd copy;
     struct node *obj;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
@@ -85,8 +85,6 @@ long npheap_lock(struct npheap_cmd __user *user_cmd)
         printk(KERN_ERR "copy_from_user failed in Lock \n" );       
         return -EFAULT;
     }
-
-    mutex_lock(&k_mutex);
     printk("locked \n");
     return 0;
 }     
@@ -99,14 +97,15 @@ long npheap_unlock(struct npheap_cmd __user *user_cmd)
     struct npheap_cmd copy;
     if(copy_from_user(&copy, user_cmd, sizeof(struct npheap_cmd))==0){
         lock = getLock(copy.offset/PAGE_SIZE);
-        mutex_unlock(&lock);
+        if(lock!=NULL){
+            mutex_unlock(&lock);
+        }
+        else
+            return 0;
     }else{
         printk(KERN_ERR "copy_from_user failed in unLock \n" );       
         return -EFAULT;
     }
-
-
-    mutex_unlock(&k_mutex);
     printk("Unlocked\n");
     return 0;
 }
@@ -143,9 +142,11 @@ long npheap_delete(struct npheap_cmd __user *user_cmd)
             llist = list_entry(position, struct node, list);
             
             if(llist->objectId == (copy.offset/PAGE_SIZE)){
-                list_del(position);
+                //list_del(position);
                 kfree(llist->k_virtual_addr);
-                kfree(llist);
+                //kfree(llist);
+                llist->size = 0;
+                llist->k_virtual_addr=NULL;
                 printk("Freed offset(object ID) :%llu \n Exiting Delete",llist->objectId);
             }
         }
@@ -181,7 +182,7 @@ __u64 getSize(__u64 inputOffset)
     return size;    
 }
 
-struct mutex* getLock(__u64 inputOffset){
+struct mutex getLock(__u64 inputOffset){
     printk("Starting getLock function");
     struct list_head *position;
     struct node *llist;
@@ -191,7 +192,7 @@ struct mutex* getLock(__u64 inputOffset){
     list_for_each(position, &kernel_llist.list){
         llist = list_entry(position, struct node, list);
         if(llist->objectId == inputOffset){
-            return llist->objLock;
+            return &(llist->objLock);
          }
     }
     return NULL;
